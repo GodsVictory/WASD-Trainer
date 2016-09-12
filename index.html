@@ -34,12 +34,6 @@ function create() {
   var style = { font: "bold 32px Arial", fill: "#fff" };
 
   enemies = game.add.group();
-  enemies.createMultiple(10, 'enemy');
-  enemies.forEach(function(enemy) {
-    enemy.x = game.world.centerX;
-    enemy.y = -50;
-    enemy.anchor.setTo(.5)
-  });
   
   ship = game.add.sprite(game.world.centerX, game.height - 50, 'ship');
   ship.anchor.setTo(.5);
@@ -63,7 +57,10 @@ function update() {
     if (right.isDown) if (ship.x < game.width - 25) ship.x += shipSpeed;
     enemies.forEach(function(enemy) {
       enemy.y += enemySpeed;
-      if (enemy.y > game.height + 25) enemy.kill();
+      if (enemy.y > game.height + 25) {
+        enemy.destroy();
+        text.setText("Score: " + ++score);
+      }
       if (Math.abs(enemy.x - ship.x) < 50 && Math.abs(enemy.y - ship.y) < 50) gameOver = 1;
     });
     if (game.time.now > lastSpawn + spawnRate) createEnemy();
@@ -75,9 +72,8 @@ function update() {
 function createEnemy()
 {
   lastSpawn = game.time.now;
-  enemy = enemies.getFirstExists(false);
-  if (enemy) enemy.reset(Math.floor(Math.random() * game.width - 25) + 25, -50);
-  text.setText("Score: " + score++);
+  var enemy = enemies.create(Math.floor(Math.random() * game.width - 25) + 25, -50, 'enemy');
+  enemy.anchor.setTo(.5);
 }
 </script>
 </head>
