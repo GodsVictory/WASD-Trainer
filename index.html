@@ -30,12 +30,6 @@ function create() {
   
   var style = { font: "bold 32px Arial", fill: "#fff" };
 
-  text = game.add.text(0, game.height + 10, "Score: 0", style);
-  text.anchor.setTo(0,1);
-  
-  ship = game.add.sprite(game.world.centerX, game.height - 50, 'ship');
-  ship.anchor.setTo(.5);
-
   enemies = game.add.group();
   enemies.createMultiple(10, 'enemy');
   enemies.forEach(function(enemy) {
@@ -43,6 +37,12 @@ function create() {
     enemy.y = -50;
     enemy.anchor.setTo(.5)
   });
+  
+  ship = game.add.sprite(game.world.centerX, game.height - 50, 'ship');
+  ship.anchor.setTo(.5);
+  
+  text = game.add.text(0, game.height + 10, "Score: 0", style);
+  text.anchor.setTo(0,1);
   
   game.input.keyboard.addKeyCapture([ Phaser.Keyboard.W, Phaser.Keyboard.D, Phaser.Keyboard.A, Phaser.Keyboard.D ]);
   up = game.input.keyboard.addKey(Phaser.Keyboard.W);
