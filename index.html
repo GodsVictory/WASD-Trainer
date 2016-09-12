@@ -1,0 +1,83 @@
+<html>
+<head>
+<script src="//cdn.jsdelivr.net/phaser/2.6.2/phaser.min.js"></script>
+<script>
+
+var gameOver = 0;
+var text;
+var ship;
+var score = 0;
+var enemyTime = 0;
+var enemies;
+var shipSpeed = 7;
+var enemySpeed = 2;
+var spawnRate = 1000;
+var lastSpawn = 0;
+var up;
+var left;
+var down;
+var right;
+  
+var game = new Phaser.Game(500, 800, Phaser.AUTO, 'Rayden', { preload: preload, create: create, update: update });
+
+function preload() {
+  game.load.image('ship', 'ship.png');
+  game.load.image('enemy', 'enemy.png');
+}
+
+function create() {
+  game.physics.startSystem(Phaser.Physics.ARCADE);
+  
+  var style = { font: "bold 32px Arial", fill: "#fff" };
+
+  text = game.add.text(0, game.height + 10, "Score: 0", style);
+  text.anchor.setTo(0,1);
+  
+  ship = game.add.sprite(game.world.centerX, game.height - 50, 'ship');
+  ship.anchor.setTo(.5);
+
+  enemies = game.add.group();
+  enemies.createMultiple(10, 'enemy');
+  enemies.forEach(function(enemy) {
+    enemy.x = game.world.centerX;
+    enemy.y = -50;
+    enemy.anchor.setTo(.5)
+  });
+  
+  game.input.keyboard.addKeyCapture([ Phaser.Keyboard.W, Phaser.Keyboard.D, Phaser.Keyboard.A, Phaser.Keyboard.D ]);
+  up = game.input.keyboard.addKey(Phaser.Keyboard.W);
+  left = game.input.keyboard.addKey(Phaser.Keyboard.A);
+  down = game.input.keyboard.addKey(Phaser.Keyboard.S);
+  right = game.input.keyboard.addKey(Phaser.Keyboard.D);
+}
+
+function update() {
+  if (!gameOver)
+  {
+    if (up.isDown) if (ship.y > 25) ship.y -= shipSpeed;
+    if (down.isDown) if (ship.y < game.height - 25) ship.y += shipSpeed;
+    if (left.isDown) if (ship.x > 25) ship.x -= shipSpeed;
+    if (right.isDown) if (ship.x < game.width - 25) ship.x += shipSpeed;
+    enemies.forEach(function(enemy) {
+      enemy.y += enemySpeed;
+      if (enemy.y > game.height + 25) enemy.kill();
+      if (Math.abs(enemy.x - ship.x) < 50 && Math.abs(enemy.y - ship.y) < 50) gameOver = 1;
+    });
+    if (game.time.now > lastSpawn + spawnRate) createEnemy();
+    enemySpeed += .01;
+    if (spawnRate != 100) spawnRate -= 1;
+  }
+}
+
+function createEnemy()
+{
+  lastSpawn = game.time.now;
+  enemy = enemies.getFirstExists(false);
+  if (enemy) enemy.reset(Math.floor(Math.random() * game.width - 25) + 25, -50);
+  text.setText("Score: " + score++);
+}
+</script>
+</head>
+<body>
+</body>
+</html>
