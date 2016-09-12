@@ -55,11 +55,11 @@ function update() {
     if (left.isDown && ship.x > 25) ship.x -= shipSpeed;
     if (right.isDown && ship.x < game.width - 25) ship.x += shipSpeed;
     enemies.forEach(function(enemy) {
-      if (enemy.y > game.height + 25) {
-        enemy.kill();
-      } else {
-        enemy.y += enemySpeed;
-      }
+      if (enemy.alive)
+        if (enemy.y > game.height + 25) {
+          enemy.kill();
+          text.setText("Score: " + ++score);
+        } else enemy.y += enemySpeed;
       if (Math.abs(enemy.x - ship.x) < 50 && Math.abs(enemy.y - ship.y) < 50) gameOver = 1;
     });
     if (game.time.now > lastSpawn + spawnRate) createEnemy();
@@ -76,7 +76,6 @@ function createEnemy() {
     enemy = enemies.create(Math.floor(Math.random() * game.width - 25) + 25, -50, 'enemy');
     enemy.anchor.setTo(.5);
   }
-  text.setText("Score: " + ++score);
 }
 </script>
 </head>
