@@ -3,6 +3,11 @@
 <title>WASD Trainer</title>
 <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 <link rel="icon" href="favicon.ico" type="image/x-icon">
+<style>
+body {padding:auto;margin:auto;background-color:#0e1717;}
+canvas { margin: 0 auto; }
+
+</style>
 <script src="//cdn.jsdelivr.net/phaser/2.6.2/phaser.min.js"></script>
 <script>
 
@@ -21,7 +26,7 @@ var left;
 var down;
 var right;
   
-var game = new Phaser.Game(500, 800, Phaser.AUTO, 'Rayden', { preload: preload, create: create, update: update });
+var game = new Phaser.Game(500, 800, Phaser.AUTO, 'WASD-Trainer', { preload: preload, create: create, update: update });
 
 function preload() {
   game.load.image('ship', 'ship.png');
@@ -30,7 +35,7 @@ function preload() {
 
 function create() {
   game.physics.startSystem(Phaser.Physics.ARCADE);
-  
+
   var style = { font: "bold 32px Arial", fill: "#fff" };
 
   enemies = game.add.group();
