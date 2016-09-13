@@ -10,14 +10,13 @@ canvas { margin: 0 auto; }
 </style>
 <script src="//cdn.jsdelivr.net/phaser/2.6.2/phaser.min.js"></script>
 <script>
-
-var gameOver = 0;
-var text;
-var end;
 var ship;
+var enemies;
+var scoreText;
+var resetText;
+var gameOver = 0;
 var score = 0;
 var enemyTime = 0;
-var enemies;
 var shipSpeed = 7;
 var enemySpeed = 2;
 var spawnRate = 1000;
@@ -39,20 +38,18 @@ function preload() {
 
 function create() {
   enemies = game.add.group();
-  
   ship = game.add.sprite(game.world.centerX, game.height - 50, 'ship');
   ship.anchor.setTo(.5);
-  
-  text = game.add.text(0, game.height + 10, "Score: 0", style);
-  text.anchor.setTo(0,1);
-  
-  game.input.keyboard.addKeyCapture([ Phaser.Keyboard.W, Phaser.Keyboard.D, Phaser.Keyboard.A, Phaser.Keyboard.D, Phaser.Keyboard.R, Phaser.Keyboard.SPACEBAR ]);
+  scoreText = game.add.text(0, game.height + 10, "Score: " + score, style);
+  scoreText.anchor.setTo(0,1);
+  resetText = game.add.text(0, 0, "Press SPACE to Restart", style);
+  resetText.kill();
+  game.input.keyboard.addKeyCapture([ Phaser.Keyboard.W, Phaser.Keyboard.D, Phaser.Keyboard.A, Phaser.Keyboard.D, Phaser.Keyboard.SPACEBAR ]);
   up = game.input.keyboard.addKey(Phaser.Keyboard.W);
   left = game.input.keyboard.addKey(Phaser.Keyboard.A);
   down = game.input.keyboard.addKey(Phaser.Keyboard.S);
   right = game.input.keyboard.addKey(Phaser.Keyboard.D);
-  reset = game.input.keyboard.addKey(Phaser.Keyboard.R);
-  space = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+  reset = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 }
 
 function update() {
@@ -61,23 +58,27 @@ function update() {
     if (down.isDown && ship.y < game.height - 30) ship.y += shipSpeed;
     if (left.isDown && ship.x > 30) ship.x -= shipSpeed;
     if (right.isDown && ship.x < game.width - 30) ship.x += shipSpeed;
+    var shipBounds = ship.getBounds();
     enemies.forEach(function(enemy) {
-      if (enemy.alive)
-        if (enemy.y > game.height + 25) {
-          enemy.kill();
-          text.setText("Score: " + ++score);
-        } else enemy.y += enemySpeed;
-      if (Math.abs(enemy.x - ship.x) < 50 && Math.abs(enemy.y - ship.y) < 50) {
+      if (Phaser.Rectangle.intersects(shipBounds, enemy.getBounds())) {
         gameOver = 1;
-        end = game.add.text(0, 0, "Press R to Restart", style);
+        resetText.revive();
+      } else {
+        enemy.y += enemySpeed
+        if (enemy.y > game.height + 25) {
+          enemy.destroy();
+          scoreText.setText("Score: " + ++score);
+        }
       }
     });
-    if (game.time.now > lastSpawn + spawnRate) createEnemy();
     enemySpeed += .01;
     if (spawnRate != 100) spawnRate -= 1;
+    if (game.time.now > lastSpawn + spawnRate) {
+      lastSpawn = game.time.now;
+      enemies.create(game.rnd.integerInRange(game.width - 25, 25), -50, 'enemy').anchor.setTo(.5);
+    }
   } else if (reset.isDown) {
-    enemies.destroy();
-    enemies = game.add.group();
+    enemies.filter(function(enemy) { return enemy }).callAll('destroy');
     ship.reset(game.world.centerX, game.height - 50);
     score = 0;
     enemyTime = 0;
@@ -86,18 +87,8 @@ function update() {
     spawnRate = 1000;
     lastSpawn = 0;
     gameOver = 0;
-    text.setText("Score: " + score);
-    end.destroy();
-  }
-}
-
-function createEnemy() {
-  lastSpawn = game.time.now;
-  var enemy = enemies.getFirstDead();
-  if (enemy) enemy.reset(Math.floor(Math.random() * game.width - 25) + 25, -50);
-  else {
-    enemy = enemies.create(Math.floor(Math.random() * game.width - 25) + 25, -50, 'enemy');
-    enemy.anchor.setTo(.5);
+    scoreText.setText("Score: " + score);
+    resetText.kill();
   }
 }
 </script>
