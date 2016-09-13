@@ -29,7 +29,7 @@ var reset;
 var space;
 var style = { font: "bold 32px Arial", fill: "#fff" };
 
-var game = new Phaser.Game(500, 700, Phaser.AUTO, 'WASD-Trainer', { preload: preload, create: create, update: update });
+var game = new Phaser.Game(700, 700, Phaser.AUTO, 'WASD-Trainer', { preload: preload, create: create, update: update });
 
 function preload() {
   game.load.image('ship', 'ship.png');
@@ -38,10 +38,11 @@ function preload() {
 
 function create() {
   enemies = game.add.group();
-  ship = game.add.sprite(game.world.centerX, game.height - 50, 'ship');
+  ship = game.add.sprite(game.world.centerX, game.world.centerY, 'ship');
   ship.anchor.setTo(.5);
   scoreText = game.add.text(0, game.height + 10, "Score: " + score, style);
   scoreText.anchor.setTo(0,1);
+  scoreText.kill();
   resetText = game.add.text(0, 0, "Press SPACE to Restart", style);
   resetText.kill();
   game.input.keyboard.addKeyCapture([ Phaser.Keyboard.W, Phaser.Keyboard.D, Phaser.Keyboard.A, Phaser.Keyboard.D, Phaser.Keyboard.SPACEBAR ]);
@@ -59,27 +60,72 @@ function update() {
     if (left.isDown && ship.x > 30) ship.x -= shipSpeed;
     if (right.isDown && ship.x < game.width - 30) ship.x += shipSpeed;
     var shipBounds = ship.getBounds();
-    enemies.forEach(function(enemy) {
-      if (Phaser.Rectangle.intersects(shipBounds, enemy.getBounds())) {
+    enemies.forEachAlive(function(enemy) {
+      var enemyBounds = enemy.getBounds();
+      if (Phaser.Rectangle.intersects(shipBounds, enemyBounds)) {
+        ship.x = shipBounds.x + ship.width / 2;
+        ship.y = shipBounds.y + ship.height / 2;
+        enemy.x = enemyBounds.x + enemy.width / 2;
+        enemy.y = enemyBounds.y + enemy.height / 2;
         gameOver = 1;
         resetText.revive();
+        scoreText.revive();
       } else {
-        enemy.y += enemySpeed
-        if (enemy.y > game.height + 25) {
-          enemy.destroy();
-          scoreText.setText("Score: " + ++score);
+        if (enemy.direction == 0) {
+          enemy.y += enemySpeed;
+          if (enemy.y > game.height + 25) {
+            enemy.kill();
+            scoreText.setText("Score: " + ++score);
+          }
+        }
+        if (enemy.direction == 1) {
+          enemy.y -= enemySpeed;
+          if (enemy.y < -25) {
+            enemy.kill();
+            scoreText.setText("Score: " + ++score);
+          }
+        }
+        if (enemy.direction == 2) {
+          enemy.x += enemySpeed;
+          if (enemy.x > game.width + 25) {
+            enemy.kill();
+            scoreText.setText("Score: " + ++score);
+          }
+        }
+        if (enemy.direction == 3) {
+          enemy.x -= enemySpeed;
+          if (enemy.x < -25) {
+            enemy.kill();
+            scoreText.setText("Score: " + ++score);
+          }
         }
       }
     });
     enemySpeed += .01;
-    if (spawnRate != 100) spawnRate -= 1;
+    spawnRate = game.height / enemySpeed * 20 / 4;
     if (game.time.now > lastSpawn + spawnRate) {
       lastSpawn = game.time.now;
-      enemies.create(game.rnd.integerInRange(game.width - 25, 25), -50, 'enemy').anchor.setTo(.5);
+      var enemy = enemies.getFirstDead();
+      if (enemy) {
+        enemy.direction = game.rnd.integerInRange(0,3);
+        if (enemy.direction == 0) enemy.reset(game.rnd.integerInRange(game.width - 25, 25), -50);
+        if (enemy.direction == 1) enemy.reset(game.rnd.integerInRange(game.width - 25, 25), game.height + 50);
+        if (enemy.direction == 2) enemy.reset(-50, game.rnd.integerInRange(game.height - 25, 25));
+        if (enemy.direction == 3) enemy.reset(game.width + 50, game.rnd.integerInRange(game.height - 25, 25));
+      } else {
+        var ran = game.rnd.integerInRange(0,3);
+        if (ran == 0) enemy = enemies.create(game.rnd.integerInRange(game.width - 25, 25), -50, 'enemy');
+        if (ran == 1) enemy = enemies.create(game.rnd.integerInRange(game.width - 25, 25), game.height + 50, 'enemy');
+        if (ran == 2) enemy = enemies.create(-50, game.rnd.integerInRange(25, game.height - 25), 'enemy');
+        if (ran == 3) enemy = enemies.create(game.width + 50, game.rnd.integerInRange(25, game.height - 25), 'enemy');
+        console.log(enemy.y);
+        enemy.anchor.setTo(.5);
+        enemy.direction = ran;
+      }
     }
   } else if (reset.isDown) {
     enemies.filter(function(enemy) { return enemy }).callAll('destroy');
-    ship.reset(game.world.centerX, game.height - 50);
+    ship.reset(game.world.centerX, game.world.centerY);
     score = 0;
     enemyTime = 0;
     shipSpeed = 7;
@@ -87,6 +133,7 @@ function update() {
     spawnRate = 1000;
     lastSpawn = 0;
     gameOver = 0;
+    scoreText.kill();
     scoreText.setText("Score: " + score);
     resetText.kill();
   }
