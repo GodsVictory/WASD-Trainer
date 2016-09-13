@@ -27,7 +27,7 @@ var down;
 var right;
 var reset;
 var space;
-var style = { font: "bold 32px Arial", fill: "#fff" };
+var style = { font: "bold Arial", fontSize: "24px", fill: "#fff" };
 
 var game = new Phaser.Game(700, 700, Phaser.AUTO, 'WASD-Trainer', { preload: preload, create: create, update: update });
 
@@ -40,10 +40,15 @@ function create() {
   enemies = game.add.group();
   ship = game.add.sprite(game.world.centerX, game.world.centerY, 'ship');
   ship.anchor.setTo(.5);
-  scoreText = game.add.text(0, game.height + 10, "Score: " + score, style);
-  scoreText.anchor.setTo(0,1);
+  gameOverText = game.add.text(game.width / 2, game.height / 2 - style.fontSize.slice(0, -2), "GAME OVER", style);
+  gameOverText.anchor.setTo(.5,.5);
+  gameOverText.kill();
+  scoreText = game.add.text(game.width / 2, game.height / 2, "SCORE: " + score, style);
+  scoreText.anchor.setTo(.5,.5);
   scoreText.kill();
-  resetText = game.add.text(0, 0, "Press SPACE to Restart", style);
+  resetText = game.add.text(game.width / 2, game.height, "Press SPACE to Restart", style);
+  resetText.fontSize = "16px";
+  resetText.anchor.setTo(.5,1);
   resetText.kill();
   game.input.keyboard.addKeyCapture([ Phaser.Keyboard.W, Phaser.Keyboard.D, Phaser.Keyboard.A, Phaser.Keyboard.D, Phaser.Keyboard.SPACEBAR ]);
   up = game.input.keyboard.addKey(Phaser.Keyboard.W);
@@ -70,6 +75,7 @@ function update() {
         gameOver = 1;
         resetText.revive();
         scoreText.revive();
+        gameOverText.revive();
       } else {
         if (enemy.direction == 0) {
           enemy.y += enemySpeed;
@@ -136,6 +142,7 @@ function update() {
     scoreText.kill();
     scoreText.setText("Score: " + score);
     resetText.kill();
+    gameOverText.kill();
   }
 }
 </script>
