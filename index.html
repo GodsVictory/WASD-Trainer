@@ -27,27 +27,26 @@ var down;
 var right;
 var reset;
 var space;
-var style = { font: "bold Arial", fontSize: "24px", fill: "#fff" };
 
 var game = new Phaser.Game(700, 700, Phaser.AUTO, 'WASD-Trainer', { preload: preload, create: create, update: update });
 
 function preload() {
   game.load.image('ship', 'ship.png');
   game.load.image('enemy', 'enemy.png');
+  game.load.bitmapFont('VCR', 'VCR.png', 'VCR.fnt');
 }
 
 function create() {
   enemies = game.add.group();
   ship = game.add.sprite(game.world.centerX, game.world.centerY, 'ship');
   ship.anchor.setTo(.5);
-  gameOverText = game.add.text(game.width / 2, game.height / 2 - style.fontSize.slice(0, -2), "GAME OVER", style);
+  gameOverText = game.add.bitmapText(game.width / 2, game.height / 2 - 32, 'VCR', "GAME OVER", 32);
   gameOverText.anchor.setTo(.5,.5);
   gameOverText.kill();
-  scoreText = game.add.text(game.width / 2, game.height / 2, "SCORE: " + score, style);
+  scoreText = game.add.bitmapText(game.width / 2, game.height / 2, 'VCR', "SCORE: " + score, 32);
   scoreText.anchor.setTo(.5,.5);
   scoreText.kill();
-  resetText = game.add.text(game.width / 2, game.height, "Press SPACE to Restart", style);
-  resetText.fontSize = "16px";
+  resetText = game.add.bitmapText(game.width / 2, game.height - 5, 'VCR', "Press SPACE to Restart", 24);
   resetText.anchor.setTo(.5,1);
   resetText.kill();
   game.input.keyboard.addKeyCapture([ Phaser.Keyboard.W, Phaser.Keyboard.D, Phaser.Keyboard.A, Phaser.Keyboard.D, Phaser.Keyboard.SPACEBAR ]);
@@ -81,28 +80,28 @@ function update() {
           enemy.y += enemySpeed;
           if (enemy.y > game.height + 25) {
             enemy.kill();
-            scoreText.setText("Score: " + ++score);
+            scoreText.text = "Score: " + ++score;
           }
         }
         if (enemy.direction == 1) {
           enemy.y -= enemySpeed;
           if (enemy.y < -25) {
             enemy.kill();
-            scoreText.setText("Score: " + ++score);
+            scoreText.text = "Score: " + ++score;
           }
         }
         if (enemy.direction == 2) {
           enemy.x += enemySpeed;
           if (enemy.x > game.width + 25) {
             enemy.kill();
-            scoreText.setText("Score: " + ++score);
+            scoreText.text = "Score: " + ++score;
           }
         }
         if (enemy.direction == 3) {
           enemy.x -= enemySpeed;
           if (enemy.x < -25) {
             enemy.kill();
-            scoreText.setText("Score: " + ++score);
+            scoreText.text = "Score: " + ++score;
           }
         }
       }
@@ -124,7 +123,6 @@ function update() {
         if (ran == 1) enemy = enemies.create(game.rnd.integerInRange(game.width - 25, 25), game.height + 50, 'enemy');
         if (ran == 2) enemy = enemies.create(-50, game.rnd.integerInRange(25, game.height - 25), 'enemy');
         if (ran == 3) enemy = enemies.create(game.width + 50, game.rnd.integerInRange(25, game.height - 25), 'enemy');
-        console.log(enemy.y);
         enemy.anchor.setTo(.5);
         enemy.direction = ran;
       }
@@ -140,7 +138,7 @@ function update() {
     lastSpawn = 0;
     gameOver = 0;
     scoreText.kill();
-    scoreText.setText("Score: " + score);
+    scoreText.text = "Score: " + score;
     resetText.kill();
     gameOverText.kill();
   }
